@@ -5,6 +5,10 @@ from sklearn import datasets
 import seaborn as sns
 import kagglehub
 import os
+import sklearn
+import kagglehub
+import statsmodels
+
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -27,11 +31,16 @@ from prophet import Prophet
 
 
 #Initializing Data
+df = pd.read_csv('Data\\movies_data.csv', encoding='ISO-8859-1')
+
+import os
+print(os.getcwd())
+
 
 try:
-    movie_df = pd.read_csv('movies_data.csv', encoding='utf-8')
+    movie_df = pd.read_csv('Data\\movies_data.csv', encoding='ISO-8859-1')
 except UnicodeDecodeError:
-    movie_df = pd.read_csv('movies_data.csv', encoding='latin-1')
+    movie_df = pd.read_csv('Data\\movies_data.csv', encoding='ISO-8859-1')
 
 print(movie_df)
 
@@ -125,7 +134,8 @@ numeric_cols = movie_df.select_dtypes(include=['float64', 'int64']).columns
 z_scores = movie_df[numeric_cols].apply(zscore)
 outliers = (z_scores.abs() > 3).any(axis=1)
 print("Outliers Detected (Rows):")
-display(movie_df[outliers])
+print(movie_df[outliers])  # Replace display with print
+
 
 
 
@@ -294,7 +304,7 @@ def train_model(X, y):
 
     return model, X_test, y_test, y_pred
 
-data = load_data('/content/movies_data.csv')
+data = pd.read_csv('Data\\movies_data.csv', encoding='ISO-8859-1')
 X, y = preprocess_data(data)
 model, X_test, y_test, y_pred = train_model(X, y)
 
