@@ -8,7 +8,7 @@ import os
 import sklearn
 import kagglehub
 import statsmodels
-
+import streamlit as st
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -195,27 +195,37 @@ plt.show()
 #This component chart from Prophet breaks down the box office earnings forecast into its main influences: trend and seasonality. The trend component shows the long-term direction of earnings, indicating whether they’re expected to grow or decline over time. The yearly seasonality chart highlights recurring patterns, revealing specific times of the year when revenue tends to peak or dip, likely corresponding to seasonal events in the film industry. By analyzing these individual components, the chart provides a deeper understanding of factors influencing box office earnings, offering actionable insights for strategic release scheduling.
 
 
+st.title("Movie Data Analysis")
 # By CHAN, Jeska Ashley B. - Unsupervised Learning: Clustering based on Budget and IMDb Scores
-plt.scatter(movie_df['Budget'], movie_df['IMDb_Rounded'], color='mediumvioletred', alpha=0.6)
-plt.title('Relationship Between Budget and IMDb Score')
-plt.xlabel('Budget (in millions)')
-plt.ylabel('IMDb Score')
-plt.show()
+st.subheader("Relationship Between Budget and IMDb Score")
+fig1, ax1 = plt.subplots()
+ax1.scatter(movie_df['Budget'], movie_df['IMDb_Rounded'], color='mediumvioletred', alpha=0.6)
+ax1.set_title('Relationship Between Budget and IMDb Score')
+ax1.set_xlabel('Budget (in millions)')
+ax1.set_ylabel('IMDb Score')
+st.pyplot(fig1)
+
 
 #The scatterplot showing the relationship between the Budget and IMDb scores show no strong correlation between them. Based on the results of the plot, regardless of the movie's budget, its IMDb scores can vary. More movies with lesser budget exhibit a wide range of IMDb scores. This suggests that the audience rating are not directly tied to the financial resources invested in the movies. Perhaps there are other factors beyong budget that could determine IMDb ratings better such as direction, cinematography, and acting.
 
 kmeans = KMeans(n_clusters=2, random_state=0)
 movie_df['Cluster'] = kmeans.fit_predict(movie_df[['Budget', 'IMDb_Rounded']])
-movie_df
 
-plt.figure(figsize=(8, 6))
-plt.scatter(movie_df['Budget'], movie_df['IMDb_Rounded'], c=movie_df['Cluster'], cmap='PiYG', s=100)
-plt.title('KMeans Clustering of Budget and IMDb Scores')
-plt.xlabel('Budget')
-plt.ylabel('IMDb Scores')
-plt.colorbar(label='Cluster')
-plt.grid(True)
-plt.show()
+st.subheader("Data with Cluster Labels")
+st.write(movie_df)
+
+# Plot with KMeans clusters
+st.subheader("KMeans Clustering of Budget and IMDb Scores")
+fig2, ax2 = plt.subplots(figsize=(8, 6))
+scatter = ax2.scatter(movie_df['Budget'], movie_df['IMDb_Rounded'], c=movie_df['Cluster'], cmap='PiYG', s=100)
+ax2.set_title('KMeans Clustering of Budget and IMDb Scores')
+ax2.set_xlabel('Budget')
+ax2.set_ylabel('IMDb Scores')
+plt.colorbar(scatter, label='Cluster')
+ax2.grid(True)
+
+# Display the second plot in Streamlit
+st.pyplot(fig2)
 
 #After applying K-Means clustering, the diagram revealed two distinct clusters, one colored magenta and the other green, which separated the data into lower-budget and higher-budget groups. However, the clustering did not demonstrate a clear pattern concerning the IMDb scores, as both groups exhibited a wide range of ratings. This observation supports the initial finding that budget does not significantly impact IMDb scores. High financial investment in a movie does not guarantee a high audience rating, and vice versa. Thus, producers should consider focusing on other factors that may influence a movie's standing. Consequently, this model alone is insufficient, and a more comprehensive model should incorporate additional variables to better ca\pture the relationships that may affect a movie's IMDb score.
 
