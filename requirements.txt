@@ -6,6 +6,3 @@ scikit-learn
 statsmodels
 streamlit
 kagglehub
-Cython>=0.22 
-pystan==2.19.1.1
-conda install -c conda-forge prophet
