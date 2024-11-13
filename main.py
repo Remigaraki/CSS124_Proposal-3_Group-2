@@ -140,6 +140,10 @@ print(movie_df[outliers])  # Replace display with print
 
 #Machine Learning
 
+
+#PUT UR CODE HERE MAGAT
+
+
 st.title("Movie Data Analysis")
 # By CHAN, Jeska Ashley B. - Unsupervised Learning: Clustering based on Budget and IMDb Scores
 st.subheader("Relationship Between Budget and IMDb Score")
