@@ -30,16 +30,16 @@ from statsmodels.tsa.arima.model import ARIMA
 
 
 #Initializing Data
-df = pd.read_csv('Data\\movies_data.csv', encoding='ISO-8859-1')
+df = pd.read_csv('Data/movies_data.csv')
 
 import os
 print(os.getcwd())
 
 
 try:
-    movie_df = pd.read_csv('Data\\movies_data.csv', encoding='ISO-8859-1')
+    movie_df = pd.read_csv('Data/movies_data.csv')
 except UnicodeDecodeError:
-    movie_df = pd.read_csv('Data\\movies_data.csv', encoding='ISO-8859-1')
+    movie_df = pd.read_csv('Data/movies_data.csv')
 
 print(movie_df)
 
