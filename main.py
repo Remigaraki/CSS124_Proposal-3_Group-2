@@ -30,16 +30,16 @@ from statsmodels.tsa.arima.model import ARIMA
 
 
 #Initializing Data
-df = pd.read_csv('Data/movies_data.csv')
+df = pd.read_csv('Data/movies_data.csv', encoding='ISO-8859-1')
 
 import os
 print(os.getcwd())
 
 
 try:
-    movie_df = pd.read_csv('Data/movies_data.csv')
+    movie_df = pd.read_csv('Data/movies_data.csv', encoding='ISO-8859-1')
 except UnicodeDecodeError:
-    movie_df = pd.read_csv('Data/movies_data.csv')
+    movie_df = pd.read_csv('Data/movies_data.csv', encoding='ISO-8859-1')
 
 print(movie_df)
 
@@ -220,7 +220,7 @@ def load_data(filepath):
     data = pd.read_csv(filepath, encoding='ISO-8859-1')
     return data
 
-data = load_data('Data/movies_data.csv')
+data = load_data('Data/movies_data.csv', encoding='ISO-8859-1')
 st.title("Movie Data Analysis and Prediction")
 
 # Drop rows with missing values for Budget, Running time, and Box Office
