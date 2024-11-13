@@ -26,7 +26,6 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.model_selection import train_test_split
 from scipy.stats import zscore
 from statsmodels.tsa.arima.model import ARIMA
-from prophet import Prophet
 
 
 
