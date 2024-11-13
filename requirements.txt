@@ -8,4 +8,4 @@ streamlit
 kagglehub
 Cython>=0.22 
 pystan==2.19.1.1
-fbprophet
+conda install -c conda-forge prophet
