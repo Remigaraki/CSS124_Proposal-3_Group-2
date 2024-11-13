@@ -142,6 +142,7 @@ print(movie_df[outliers])  # Replace display with print
 #Machine Learning
 
 # By MAGAT, Rolando -  Time Series Models
+# Prepare data for time series analysis
 data = movie_df[['Release year', 'Box Office']].dropna()
 data = data.rename(columns={'Release year': 'Year', 'Box Office': 'Earnings'})
 
@@ -149,6 +150,12 @@ data = data.rename(columns={'Release year': 'Year', 'Box Office': 'Earnings'})
 data['Year'] = pd.to_datetime(data['Year'], format='%Y')
 data.set_index('Year', inplace=True)
 
+# Display title
+st.title("Box Office Earnings Forecasting with ARIMA and Prophet")
+
+# --- ARIMA Model Forecast ---
+
+st.subheader("ARIMA Model Forecast")
 # Fit ARIMA model
 arima_model = ARIMA(data['Earnings'], order=(1, 1, 1))  # You can adjust the order
 arima_model_fit = arima_model.fit()
@@ -158,39 +165,64 @@ forecast_years = 5
 arima_forecast = arima_model_fit.forecast(steps=forecast_years)
 
 # Plot ARIMA Forecast
-plt.figure(figsize=(10, 6))
-plt.plot(data.index, data['Earnings'], label='Historical Earnings')
-plt.plot(pd.date_range(data.index[-1], periods=forecast_years+1, freq='Y')[1:], arima_forecast, label='ARIMA Forecast', color='orange')
-plt.title("Box Office Earnings Forecast with ARIMA")
-plt.xlabel("Year")
-plt.ylabel("Earnings")
-plt.legend()
-plt.show()
+fig1, ax1 = plt.subplots(figsize=(10, 6))
+ax1.plot(data.index, data['Earnings'], label='Historical Earnings')
+ax1.plot(pd.date_range(data.index[-1], periods=forecast_years + 1, freq='Y')[1:], arima_forecast, label='ARIMA Forecast', color='orange')
+ax1.set_title("Box Office Earnings Forecast with ARIMA")
+ax1.set_xlabel("Year")
+ax1.set_ylabel("Earnings")
+ax1.legend()
 
-#This chart shows historical box office earnings alongside the ARIMA model’s five-year forecast. The blue line represents the historical data, displaying trends in revenue over the years. The orange line, which forecasts future values, continues the existing trend, reflecting ARIMA’s ability to detect linear growth or decline based on past data. This model is ideal for identifying straightforward, time-dependent patterns in box office earnings but may struggle with non-linear changes or complex seasonality. If the forecast line is relatively flat, ARIMA anticipates stable growth based on prior trends, yet actual future earnings may vary based on unmodeled factors.
+# Display the ARIMA forecast plot in Streamlit
+st.pyplot(fig1)
 
+st.write("""
+This chart shows historical box office earnings alongside the ARIMA model’s five-year forecast. The blue line represents the historical data, displaying trends in revenue over the years, while the orange line forecasts future values.
+""")
+
+# --- Prophet Model Forecast ---
+
+st.subheader("Prophet Model Forecast")
+# Prepare data for Prophet
 prophet_data = data.reset_index().rename(columns={'Year': 'ds', 'Earnings': 'y'})
 
-
+# Fit Prophet model
 prophet_model = Prophet(yearly_seasonality=True)
 prophet_model.fit(prophet_data)
 
+# Create a future dataframe and make predictions
 future = prophet_model.make_future_dataframe(periods=forecast_years, freq='Y')
 prophet_forecast = prophet_model.predict(future)
 
-plt.figure(figsize=(10, 6))
-plt.plot(data.index, data['Earnings'], label='Historical Earnings')
-plt.plot(prophet_forecast['ds'], prophet_forecast['yhat'], label='Prophet Forecast', color='red')
-plt.title("Box Office Earnings Forecast with Prophet")
-plt.xlabel("Year")
-plt.ylabel("Earnings")
-plt.legend()
-plt.show()
+# Plot Prophet Forecast
+fig2, ax2 = plt.subplots(figsize=(10, 6))
+ax2.plot(data.index, data['Earnings'], label='Historical Earnings')
+ax2.plot(prophet_forecast['ds'], prophet_forecast['yhat'], label='Prophet Forecast', color='red')
+ax2.set_title("Box Office Earnings Forecast with Prophet")
+ax2.set_xlabel("Year")
+ax2.set_ylabel("Earnings")
+ax2.legend()
+
+# Display the Prophet forecast plot in Streamlit
+st.pyplot(fig2)
+
+st.write("""
+In this chart, historical earnings (blue line) are plotted alongside Prophet’s forecast (red line) for the next five years. The red line suggests how box office earnings might shift if historical patterns repeat.
+""")
+
+#This chart shows historical box office earnings alongside the ARIMA model’s five-year forecast. The blue line represents the historical data, displaying trends in revenue over the years. The orange line, which forecasts future values, continues the existing trend, reflecting ARIMA’s ability to detect linear growth or decline based on past data. This model is ideal for identifying straightforward, time-dependent patterns in box office earnings but may struggle with non-linear changes or complex seasonality. If the forecast line is relatively flat, ARIMA anticipates stable growth based on prior trends, yet actual future earnings may vary based on unmodeled factors.
+
+st.subheader("Prophet Model Components")
+# Plot Prophet forecast components
+fig3 = prophet_model.plot_components(prophet_forecast)
+
+# Display the Prophet component plot in Streamlit
+st.pyplot(fig3)
+st.write("""
+This component chart from Prophet breaks down the box office earnings forecast into its main influences: trend and seasonality, offering insights for strategic release scheduling.
+""")
 
 #In this chart, historical earnings (blue line) are plotted alongside Prophet’s forecast (red line) for the next five years. Prophet’s forecast adapts well to yearly patterns and trends, as it accounts for both overall direction and seasonal fluctuations. The red line suggests how box office earnings might shift if historical patterns repeat, and it’s especially useful in capturing cyclical trends like summer blockbusters or holiday releases. This seasonally-aware forecast can provide insights into when earnings might peak or dip within a year, making Prophet well-suited for industries with distinct seasonal revenue patterns.
-
-prophet_model.plot_components(prophet_forecast)
-plt.show()
 
 #This component chart from Prophet breaks down the box office earnings forecast into its main influences: trend and seasonality. The trend component shows the long-term direction of earnings, indicating whether they’re expected to grow or decline over time. The yearly seasonality chart highlights recurring patterns, revealing specific times of the year when revenue tends to peak or dip, likely corresponding to seasonal events in the film industry. By analyzing these individual components, the chart provides a deeper understanding of factors influencing box office earnings, offering actionable insights for strategic release scheduling.
 
@@ -233,6 +265,9 @@ st.pyplot(fig2)
 
 def get_recommendations(title):
     movie_info = movie_df.loc[movie_df['Movie'] == title]
+    if movie_info.empty:
+        return pd.DataFrame()  # Return an empty DataFrame if the movie is not found
+
     movie_genre = movie_info['Genre'].values[0]
     movie_year = movie_info['Release year'].values[0]
     directors = movie_info[['Director', 'Actor 1', 'Actor 2', 'Actor 3']].values.flatten()
@@ -250,48 +285,55 @@ def get_recommendations(title):
     filtered_movies.loc[filtered_movies['Release year'].between(movie_year - 5, movie_year + 5), 'Score'] += 3
 
     top_recommendations = filtered_movies.sort_values(by=['Score', 'IMDb score'], ascending=[False, False]).head(10)
-
+    
     return top_recommendations[['Movie', 'Director', 'Genre', 'IMDb score', 'Release year']]
 
-def print_recommendations(title):
-    recommendations_diverse = get_recommendations(title)
-    print(f"Recommendations for: {title}")
-    print(recommendations_diverse)
+st.title("Movie Recommendation System")
+st.write("Content-based filter based on movie's Director, Genre, and Actors")
+title = st.selectbox("Select a movie title for recommendations:", movie_df['Movie'].unique())
 
-print_recommendations("Insidious")
-print_recommendations("Mad Max")
-print_recommendations("Harry Potter and the Order of the Phoenix")
+if title:
+    recommendations = get_recommendations(title)
+    if not recommendations.empty:
+        st.subheader(f"Recommendations for: {title}")
+        st.dataframe(recommendations)
+    else:
+        st.write("No recommendations found for the selected title.")
 
 
 # By DRILON, Rafael Francisco V. - Supervised Learning: Linear regression relationshop based on 'Budget' and 'Box Office'
-data_cleaned = movie_df.dropna(subset=['Budget', 'Running time', 'Box Office'])
-
-plt.figure(figsize=(10, 6))
-sns.scatterplot(x='Budget', y='Box Office', data=data_cleaned, color='blue', alpha=0.6)
-plt.title('Budget vs. Box Office (Raw Data)', fontsize=14)
-plt.xlabel('Budget ($)', fontsize=12)
-plt.ylabel('Box Office ($)', fontsize=12)
-plt.grid(True)
-plt.show()
-
-# Linear regression relationship based on 'Running time' and 'Box Office'
-plt.figure(figsize=(10, 6))
-sns.scatterplot(x='Running time', y='Box Office', data=data_cleaned, color='green', alpha=0.6)
-plt.title('Running Time vs. Box Office (Raw Data)', fontsize=14)
-plt.xlabel('Running Time (Minutes)', fontsize=12)
-plt.ylabel('Box Office ($)', fontsize=12)
-plt.grid(True)
-plt.show()
-
-#The two graphs above illustrate how budget and running time relate to whether or not the film will be a box office success. Though many low-budget films also do well at the box office, the plots show that a larger budget typically translates into higher box office earnings, proving that budget alone does not ensure success. On the other hand, the majority of movies are between 90 and 150 minutes long, and their earnings are usually less than $500 million, indicating that running time has little bearing on box office performance. This implies that although budget may play a role, other factors probably have a greater influence on a film's box office performance than budget or running time alone.
-
+@st.cache_data
 def load_data(filepath):
     data = pd.read_csv(filepath, encoding='ISO-8859-1')
-    print("First 5 rows of the dataset:\n", data.head())
-    print("\nDataset Info:\n", data.info())
-    print("\nMissing values:\n", data.isnull().sum())
     return data
 
+data = load_data('Data/movies_data.csv')
+st.title("Movie Data Analysis and Prediction")
+
+# Drop rows with missing values for Budget, Running time, and Box Office
+data_cleaned = data.dropna(subset=['Budget', 'Running time', 'Box Office'])
+
+# Scatter plot of Budget vs. Box Office
+st.subheader("Budget vs. Box Office (Raw Data)")
+fig1, ax1 = plt.subplots(figsize=(10, 6))
+sns.scatterplot(x='Budget', y='Box Office', data=data_cleaned, color='blue', alpha=0.6, ax=ax1)
+ax1.set_title('Budget vs. Box Office (Raw Data)', fontsize=14)
+ax1.set_xlabel('Budget ($)', fontsize=12)
+ax1.set_ylabel('Box Office ($)', fontsize=12)
+ax1.grid(True)
+st.pyplot(fig1)
+
+# Scatter plot of Running Time vs. Box Office
+st.subheader("Running Time vs. Box Office (Raw Data)")
+fig2, ax2 = plt.subplots(figsize=(10, 6))
+sns.scatterplot(x='Running time', y='Box Office', data=data_cleaned, color='green', alpha=0.6, ax=ax2)
+ax2.set_title('Running Time vs. Box Office (Raw Data)', fontsize=14)
+ax2.set_xlabel('Running Time (Minutes)', fontsize=12)
+ax2.set_ylabel('Box Office ($)', fontsize=12)
+ax2.grid(True)
+st.pyplot(fig2)
+
+# Preprocess data for model training
 def preprocess_data(data):
     data = data.dropna(subset=['Budget', 'Running time', 'Box Office'])
     scaler = StandardScaler()
@@ -300,6 +342,9 @@ def preprocess_data(data):
     y = data['Box Office']
     return X, y
 
+X, y = preprocess_data(data)
+
+# Train model and evaluate performance
 def train_model(X, y):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     model = LinearRegression()
@@ -307,114 +352,111 @@ def train_model(X, y):
     y_pred = model.predict(X_test)
     mse = mean_squared_error(y_test, y_pred)
     r2 = r2_score(y_test, y_pred)
+    return model, X_test, y_test, y_pred, mse, r2
 
-    print("Model Evaluation:")
-    print("Mean Squared Error (MSE):", mse)
-    print("R-squared (R²):", r2)
+model, X_test, y_test, y_pred, mse, r2 = train_model(X, y)
 
-    return model, X_test, y_test, y_pred
+# Display model evaluation metrics
+st.subheader("Model Evaluation")
+st.write("Mean Squared Error (MSE):", mse)
+st.write("R-squared (R²):", r2)
 
-data = pd.read_csv('Data\\movies_data.csv', encoding='ISO-8859-1')
-X, y = preprocess_data(data)
-model, X_test, y_test, y_pred = train_model(X, y)
+# Plot actual vs. predicted Box Office values
+st.subheader("Actual vs. Predicted Box Office")
+fig3, ax3 = plt.subplots(figsize=(10, 6))
+ax3.scatter(y_test, y_pred, color='blue')
+ax3.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='red', linewidth=2)
+ax3.set_xlabel("Actual Box Office")
+ax3.set_ylabel("Predicted Box Office")
+ax3.set_title("Actual vs Predicted Box Office")
+ax3.grid(True)
+st.pyplot(fig3)
 
-
-# Plot actual vs. predicted values
-plt.figure(figsize=(10, 6))
-plt.scatter(y_test, y_pred, color='blue')
-plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='red', linewidth=2)
-plt.xlabel("Actual Box Office")
-plt.ylabel("Predicted Box Office")
-plt.title("Actual vs Predicted Box Office")
-plt.grid(True)
-plt.show()
-model
+#The two graphs above illustrate how budget and running time relate to whether or not the film will be a box office success. Though many low-budget films also do well at the box office, the plots show that a larger budget typically translates into higher box office earnings, proving that budget alone does not ensure success. On the other hand, the majority of movies are between 90 and 150 minutes long, and their earnings are usually less than $500 million, indicating that running time has little bearing on box office performance. This implies that although budget may play a role, other factors probably have a greater influence on a film's box office performance than budget or running time alone.
 
 #Budget vs. Box Office and Running Time vs. Box Office were the first scatter plots used in the analysis. These plots indicated that although budget and box office earnings are positively correlated, neither factor by itself significantly influences a film's financial success. Building on these findings, after using the learing model. The Actual vs. Predicted Box Office plot illustrates how well the supervised linear regression model predicts earnings for lower-grossing films while significantly underestimating earnings for higher-grossing ones. The model might be missing important non-linear relationships or other factors that contribute to blockbuster success, as indicated by the large deviation from the 1:1 line for high box office values. Future iterations of the model might benefit from investigating non-linear modeling and adding more factors to improve predictive accuracy.
 
 
 
 # By HERRERA, Kael - Supervised Learning : Linear Regression based based on Movie Box Office Earnings Time Series Analysis and Forecasting
-data = movie_df.dropna()[['Release year', 'Box Office']]
-data = data.rename(columns={'Release year': 'Year', 'Box Office': 'Earnings'})
+@st.cache_data
+def load_data():
+    data = movie_df.dropna(subset=['Release year', 'Box Office'])[['Release year', 'Box Office']]
+    data = data.rename(columns={'Release year': 'Year', 'Box Office': 'Earnings'})
+    data['Year'] = pd.to_datetime(data['Year'], format='%Y').dt.year
+    data = data.sort_values('Year')
+    return data
 
-# Convert 'Year' to datetime format and extract the year
-data['Year'] = pd.to_datetime(data['Year'], format='%Y')
-data['Year'] = data['Year'].dt.year
+data = load_data()
+st.title("Box Office Earnings Analysis and Forecasting")
 
-# Sort by time to ensure proper order
-data = data.sort_values('Year')
+# Plot: Box Office Earnings Over Time
+st.subheader("Box Office Earnings Over Time")
+fig1, ax1 = plt.subplots(figsize=(12, 6))
+ax1.plot(data['Year'], data['Earnings'], color='blue', marker='o', linestyle='-')
+ax1.set_title("Box Office Earnings Over Time")
+ax1.set_xlabel("Year")
+ax1.set_ylabel("Earnings")
+ax1.grid(True)
+st.pyplot(fig1)
 
-plt.figure(figsize=(12, 6))
-plt.plot(data['Year'], data['Earnings'], color='blue', marker='o', linestyle='-')
-plt.title("Box Office Earnings Over Time")
-plt.xlabel("Year")
-plt.ylabel("Earnings")
-plt.grid(True)
-plt.show()
-
-#This line graph shows Box Office Earnings by release year. By plotting this trend, we observe fluctuations over the years and can identify any upward or downward trends. Notable peaks might correspond to high-grossing years, possibly influenced by successful blockbuster releases.
-
-# Compute a rolling average (5-year window)
+# Compute and plot 5-Year Rolling Average
+st.subheader("Box Office Earnings with 5-Year Rolling Average")
 data['Rolling_Avg'] = data['Earnings'].rolling(window=5).mean()
+fig2, ax2 = plt.subplots(figsize=(12, 6))
+ax2.plot(data['Year'], data['Earnings'], label="Earnings", color='blue', marker='o', linestyle='-')
+ax2.plot(data['Year'], data['Rolling_Avg'], label="5-Year Rolling Average", color='orange', linestyle='--')
+ax2.set_title("Box Office Earnings with 5-Year Rolling Average")
+ax2.set_xlabel("Year")
+ax2.set_ylabel("Earnings")
+ax2.legend()
+ax2.grid(True)
+st.pyplot(fig2)
 
-# Plot
-plt.figure(figsize=(12, 6))
-plt.plot(data['Year'], data['Earnings'], label="Earnings", color='blue', marker='o', linestyle='-')
-plt.plot(data['Year'], data['Rolling_Avg'], label="5-Year Rolling Average", color='orange', linestyle='--')
-plt.title("Box Office Earnings with 5-Year Rolling Average")
-plt.xlabel("Year")
-plt.ylabel("Earnings")
-plt.legend()
-plt.grid(True)
-plt.show()
-
-#The orange line represents a 5-year rolling average, smoothing the data to show a clearer long-term trend. This helps us reduce the impact of yearly fluctuations, giving us a clearer view of the trend—whether it’s increasing, decreasing, or staying relatively stable.
-
+# Train linear regression model
 X = data[['Year']]
 y = data['Earnings']
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)  # shuffle=False keeps time order
-
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
 
 model = LinearRegression()
 model.fit(X_train, y_train)
-
-# Make predictions on the test set
 y_pred = model.predict(X_test)
 
-# Plot the results
-plt.figure(figsize=(10, 6))
-plt.plot(data['Year'], data['Earnings'], label='Actual Earnings', color='blue')
-plt.plot(X_test, y_pred, label='Predicted Earnings', color='orange', linestyle='--')
-plt.title("Box Office Earnings Over Time: Actual vs. Predicted (Linear Regression)")
-plt.xlabel("Year")
-plt.ylabel("Earnings")
-plt.legend()
-plt.show()
+# Plot Actual vs. Predicted Earnings
+st.subheader("Actual vs. Predicted Box Office Earnings (Linear Regression)")
+fig3, ax3 = plt.subplots(figsize=(10, 6))
+ax3.plot(data['Year'], data['Earnings'], label='Actual Earnings', color='blue')
+ax3.plot(X_test, y_pred, label='Predicted Earnings', color='orange', linestyle='--')
+ax3.set_title("Box Office Earnings Over Time: Actual vs. Predicted (Linear Regression)")
+ax3.set_xlabel("Year")
+ax3.set_ylabel("Earnings")
+ax3.legend()
+st.pyplot(fig3)
 
-# Evaluate the model with Mean Squared Error (MSE)
+# Display Mean Squared Error
 mse = mean_squared_error(y_test, y_pred)
-print(f'Mean Squared Error: {mse}')
-
-#This plot compares the **actual box office earnings with the predictions made by our linear regression model** on the test set. The orange line represents predicted values, helping us see how well the model aligns with real data. While linear regression may not capture complex fluctuations, it provides a useful approximation for long-term trend forecasting.
-
+st.write(f"Mean Squared Error (MSE): {mse}")
 
 # Forecast for the next 5 years
+st.subheader("Future Forecast of Box Office Earnings")
 future_years = pd.DataFrame({'Year': np.arange(data['Year'].max() + 1, data['Year'].max() + 6)})
-
-# Predict future earnings
 future_predictions = model.predict(future_years)
 
 # Plot historical data and future forecast
-plt.figure(figsize=(10, 6))
-plt.plot(data['Year'], data['Earnings'], label='Historical Earnings')
-plt.plot(future_years, future_predictions, label='Future Forecast', color='red', linestyle='--')
-plt.title("Box Office Earnings Forecast with Linear Regression")
-plt.xlabel("Year")
-plt.ylabel("Earnings")
-plt.legend()
-plt.show()
+fig4, ax4 = plt.subplots(figsize=(10, 6))
+ax4.plot(data['Year'], data['Earnings'], label='Historical Earnings')
+ax4.plot(future_years, future_predictions, label='Future Forecast', color='red', linestyle='--')
+ax4.set_title("Box Office Earnings Forecast with Linear Regression")
+ax4.set_xlabel("Year")
+ax4.set_ylabel("Earnings")
+ax4.legend()
+st.pyplot(fig4)
+
+#This line graph shows Box Office Earnings by release year. By plotting this trend, we observe fluctuations over the years and can identify any upward or downward trends. Notable peaks might correspond to high-grossing years, possibly influenced by successful blockbuster releases.
+
+#The orange line represents a 5-year rolling average, smoothing the data to show a clearer long-term trend. This helps us reduce the impact of yearly fluctuations, giving us a clearer view of the trend—whether it’s increasing, decreasing, or staying relatively stable.
+
+#This plot compares the **actual box office earnings with the predictions made by our linear regression model** on the test set. The orange line represents predicted values, helping us see how well the model aligns with real data. While linear regression may not capture complex fluctuations, it provides a useful approximation for long-term trend forecasting.
 
 #Here, the red dashed line shows our forecast for the next five years based on the historical trend identified by linear regression. This projection assumes the same general pattern continues, with future values reflecting an estimated growth or decline based on the observed trend. This analysis provided a basis for understanding and forecasting box office earnings. However, if we observe complex seasonality or non-linear patterns in the data, we may consider more sophisticated models, such as ARIMA or Prophet, to improve predictive accuracy.
 
