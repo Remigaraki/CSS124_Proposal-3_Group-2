@@ -140,9 +140,58 @@ print(movie_df[outliers])  # Replace display with print
 
 #Machine Learning
 
+#ARIMA
 
-#PUT UR CODE HERE MAGAT
+data = movie_df[['Release year', 'Box Office']].dropna()
+data = data.rename(columns={'Release year': 'Year', 'Box Office': 'Earnings'})
 
+# Ensure 'Year' is in datetime format for time series analysis
+data['Year'] = pd.to_datetime(data['Year'], format='%Y')
+data.set_index('Year', inplace=True)
+
+# Fit ARIMA model
+arima_model = ARIMA(data['Earnings'], order=(1, 1, 1))  # You can adjust the order
+arima_model_fit = arima_model.fit()
+
+# Forecast for the next 5 years
+forecast_years = 5
+arima_forecast = arima_model_fit.forecast(steps=forecast_years)
+
+# Plot ARIMA Forecast
+plt.figure(figsize=(10, 6))
+plt.plot(data.index, data['Earnings'], label='Historical Earnings')
+plt.plot(pd.date_range(data.index[-1], periods=forecast_years+1, freq='Y')[1:], arima_forecast, label='ARIMA Forecast', color='orange')
+plt.title("Box Office Earnings Forecast with ARIMA")
+plt.xlabel("Year")
+plt.ylabel("Earnings")
+plt.legend()
+plt.show()
+
+#ETS
+
+ets_model = ExponentialSmoothing(
+    data['Earnings'], 
+    trend="additive",         # or "multiplicative" based on observed trend
+    seasonal="additive",      # or "multiplicative" based on observed seasonality
+    seasonal_periods=12       # assumes monthly seasonality; adjust for other frequencies
+)
+
+# Fit the model to the data
+ets_result = ets_model.fit()
+
+# Forecast future earnings (e.g., 24 months into the future)
+forecast_years = 24
+ets_forecast = ets_result.forecast(steps=forecast_years)
+
+# Plot historical data and forecast
+plt.figure(figsize=(10, 6))
+plt.plot(data.index, data['Earnings'], label="Historical Earnings")
+plt.plot(ets_forecast.index, ets_forecast, label="ETS Forecast", color='red')
+plt.title("Box Office Earnings Forecast with Holt-Winters (ETS)")
+plt.xlabel("Year")
+plt.ylabel("Earnings")
+plt.legend()
+plt.show()
 
 st.title("Movie Data Analysis")
 # By CHAN, Jeska Ashley B. - Unsupervised Learning: Clustering based on Budget and IMDb Scores
