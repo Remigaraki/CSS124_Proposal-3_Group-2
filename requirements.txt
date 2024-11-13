@@ -1,4 +1,8 @@
-matplotlib
-pandas
-seaborn
 numpy
+pandas
+matplotlib
+seaborn
+scikit-learn
+statsmodels
+streamlit
+kagglehub
