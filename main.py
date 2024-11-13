@@ -220,7 +220,7 @@ def load_data(filepath):
     data = pd.read_csv(filepath, encoding='ISO-8859-1')
     return data
 
-data = load_data('Data/movies_data.csv', encoding='ISO-8859-1')
+data = load_data('Data/movies_data.csv')
 st.title("Movie Data Analysis and Prediction")
 
 # Drop rows with missing values for Budget, Running time, and Box Office
