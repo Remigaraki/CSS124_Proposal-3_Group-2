@@ -68,6 +68,9 @@ with st.sidebar:
     if st.button("EDA", use_container_width=True, on_click=set_page_selection, args=('eda',)):
         st.session_state.page_selection = "eda"
 
+    if st.button("Recommendations", use_container_width=True, on_click=set_page_selection, args=('recommendations',)):
+        st.session_state.page_selection = "recommendations"
+
     if st.button("Machine Learning", use_container_width=True, on_click=set_page_selection, args=('machine_learning',)): 
         st.session_state.page_selection = "machine_learning"
 
@@ -328,6 +331,41 @@ elif st.session_state.page_selection == "eda":
             sns.boxplot(x='Genre', y='IMDb score', data=df, ax=ax)
             plt.xticks(rotation=90)
             col2.pyplot(fig)
+
+
+def get_recommendations(title, movie_df):
+    movie_info = movie_df.loc[movie_df['Movie'] == title]
+    movie_genre = movie_info['Genre'].values[0]
+    movie_year = movie_info['Release year'].values[0]
+    directors = movie_info[['Director', 'Actor 1', 'Actor 2', 'Actor 3']].values.flatten()
+
+    filtered_movies = movie_df[
+        (movie_df['Genre'].str.contains(movie_genre, case=False)) &
+        (movie_df['Movie'] != title)
+    ].copy()
+
+    filtered_movies['Score'] = 0
+    filtered_movies.loc[filtered_movies['Director'].isin(directors), 'Score'] += 10
+    filtered_movies.loc[filtered_movies['Actor 1'].isin(directors), 'Score'] += 5
+    filtered_movies.loc[filtered_movies['Actor 2'].isin(directors), 'Score'] += 5
+    filtered_movies.loc[filtered_movies['Actor 3'].isin(directors), 'Score'] += 5
+    filtered_movies.loc[filtered_movies['Release year'].between(movie_year - 5, movie_year + 5), 'Score'] += 3
+
+    top_recommendations = filtered_movies.sort_values(by=['Score', 'IMDb score'], ascending=[False, False]).head(10)
+    return top_recommendations[['Movie', 'Director', 'Genre', 'IMDb score', 'Release year']]
+
+def recommendations_page(movie_df):
+    st.header("🎬 Movie Recommendations")
+    selected_movie = st.selectbox("Select a movie:", movie_df['Movie'].unique())
+    
+    if st.button("Get Recommendations"):
+        recommendations = get_recommendations(selected_movie, movie_df)
+        st.subheader(f"Recommendations for: {selected_movie}")
+        st.dataframe(recommendations)
+
+# Display the Recommendations page when selected
+if st.session_state.page_selection == "recommendations":
+    recommendations_page(movie_df)
 
 
 #############################################################
