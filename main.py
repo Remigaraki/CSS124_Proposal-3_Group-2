@@ -28,6 +28,7 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.model_selection import train_test_split
 from scipy.stats import zscore
 from sklearn.preprocessing import MinMaxScaler
+from prophet import Prophet
 
 #######################
 # Page configuration

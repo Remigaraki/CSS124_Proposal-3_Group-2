@@ -6,3 +6,4 @@ scikit-learn
 statsmodels
 streamlit
 kagglehub
+prophet
