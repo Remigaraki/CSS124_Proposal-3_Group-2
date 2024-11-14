@@ -120,7 +120,7 @@ if st.session_state.page_selection == "about":
      ### Pages
     `Dataset`: A synopsis of the Movies Dataset that is utilized in this dashboard.  
     `EDA`: Highlights the connection between the IMDb score, Box Office, Earnings, Running time, actors and other variables in the data set.  
-    `Machine Learning`: Logistic Regression model training. The model evaluation, feature importance, and classification report are also included on this page.  
+    `Machine Learning`: The model evaluation, feature importance, and classification report are also included on this page.  
     `Conclusion`: An overview of the findings and observations from the model training and EDA.    
         """)
 
