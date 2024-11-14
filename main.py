@@ -346,6 +346,11 @@ if st.session_state.page_selection == "machine_learning":
         ax1.set_ylabel('IMDb Score')
         st.pyplot(fig1)
 
+        st.markdown("The scatterplot suggests that there is no strong correlation between Budget and IMDb scores for lower-budget movies. However, as the budget increases, the less likely it is to receive low IMDb scores.")
+
+        st.write("")  
+        st.divider()  
+
     # KMeans Clustering
     kmeans = KMeans(n_clusters=2, random_state=0)
     movie_df['Cluster'] = kmeans.fit_predict(movie_df[['Budget', 'IMDb score']])
@@ -361,6 +366,11 @@ if st.session_state.page_selection == "machine_learning":
         ax2.grid(True)
         st.pyplot(fig2)
 
+        st.markdown("K-Means clustering split the diagram into lower-budget [MAGENTA] and higher-budget [GREEN] groups. While some high-budget movies still have low IMDb scores, there is a clear trend that higher-budget movies tend to perform better.")
+
+        st.write("")  
+        st.divider()  
+
     # Scatter Plot 2: Budget vs. Box Office
     data_cleaned = movie_df.dropna(subset=['Budget', 'Running time', 'Box Office'])
     col3, col4 = st.columns(2)
@@ -375,6 +385,11 @@ if st.session_state.page_selection == "machine_learning":
         ax3.grid(True)
         st.pyplot(fig3)
 
+        st.markdown("Though many low-budget films also do well at the box office, the plots show that a larger budget typically translates into higher box office earnings.")
+
+        st.write("")  
+        st.divider()  
+
     # Scatter Plot 3: Running Time vs. Box Office
     with col4:
         st.subheader("Running Time vs. Box Office (Raw Data)")
@@ -385,6 +400,11 @@ if st.session_state.page_selection == "machine_learning":
         ax4.set_ylabel('Box Office ($)')
         ax4.grid(True)
         st.pyplot(fig4)
+
+        st.markdown("Most of the movies are between 90 and 150 minutes long, and their earnings are usually less than $500 million, indicating that running time has little bearing on box office performance.")
+
+        st.write("")  
+        st.divider() 
 
     # Scatter Plot: Actual vs Predicted Box Office Earnings
     col5, col6 = st.columns(2)
@@ -406,6 +426,11 @@ if st.session_state.page_selection == "machine_learning":
         ax5.grid(True)
         st.pyplot(fig5)
 
+        st.markdown("The Actual vs. Predicted Box Office plot illustrates how well the supervised linear regression model predicts earnings for lower-grossing films while significantly underestimating earnings for higher-grossing ones.")
+
+        st.write("")  
+        st.divider() 
+
     # Time Series Plot: Box Office Earnings Over Time
     data = movie_df.dropna()[['Release year', 'Box Office']]
     data = data.rename(columns={'Release year': 'Year', 'Box Office': 'Earnings'})
@@ -422,6 +447,11 @@ if st.session_state.page_selection == "machine_learning":
         ax6.grid(True)
         st.pyplot(fig6)
 
+        st.markdown("This line graph shows Box Office Earnings by release year. Peaks correspond to years with high-grossing box office sales from successful blockbuster releases.")
+
+        st.write("")  
+        st.divider() 
+
     # Time Series Plot with Rolling Average
     col7, col8 = st.columns(2)
     data['Rolling_Avg'] = data['Earnings'].rolling(window=5).mean()
@@ -436,6 +466,11 @@ if st.session_state.page_selection == "machine_learning":
         ax7.legend()
         ax7.grid(True)
         st.pyplot(fig7)
+
+        st.markdown("The orange line represents a 5-year rolling average, smoothing the data to show a clearer long-term trend. This helps us reduce the impact of yearly fluctuations, giving us a clearer view of the trend—whether it’s increasing, decreasing, or staying relatively stable.")
+
+        st.write("")  
+        st.divider() 
 
     # Time Series Forecasting with Linear Regression
     future_years = pd.DataFrame({'Year': np.arange(data['Year'].max() + 1, data['Year'].max() + 6)})
@@ -457,6 +492,11 @@ if st.session_state.page_selection == "machine_learning":
         ax8.set_ylabel("Earnings")
         ax8.legend()
         st.pyplot(fig8)
+
+        st.markdown("The red dashed line shows the forecast for the next five years based on the historical trend identified by linear regression. This projection assumes the same general pattern continues, with future values reflecting an estimated growth or decline based on the observed trend. ")
+
+        st.write("")  
+        st.divider() 
 
     # Prophet Forecasting
     movie_df.columns = movie_df.columns.str.strip()
@@ -482,11 +522,20 @@ if st.session_state.page_selection == "machine_learning":
         plt.ylabel("Box Office Earnings")
         st.pyplot(fig_prophet1)
 
+        st.markdown("""
+            The Prophet model applied to box office earnings in these graphs shows a strong upward trend in revenue over time, especially noticeable after the 1990s. The trend component reveals a steady increase, which accelerates sharply in recent years, suggesting that box office earnings have grown significantly, potentially due to factors like higher ticket prices, a greater number of releases, or increased global demand. The yearly seasonality plot highlights cyclic fluctuations in earnings, with peaks and troughs within each year, possibly aligned with major film release periods like summer and the holiday season. Prophet’s forecast with confidence intervals (in blue) indicates anticipated continued growth with periodic variations, showing Prophet's ability to capture both long-term trends and seasonal effects in box office revenue.
+            """)
+
     # Prophet Component Plot in col8
     with col8:
         st.subheader("Forecast Components with Prophet")
         fig_prophet2 = model_prophet.plot_components(forecast)
         st.pyplot(fig_prophet2)
+
+        st.write("")
+        st.markdown("""
+            The LSTM model's charts for box office earnings show a strong upward trend captured in both historical data predictions and future forecasts. The first chart illustrates a steep increase in projected earnings, suggesting the model has identified an accelerating growth trend, though it may overstate future earnings if unchecked by real-world constraints. The second chart, comparing actual and predicted values on test data, shows that the model successfully captures the overall upward trajectory but overestimates earnings in some areas, indicating it could benefit from further tuning to handle short-term fluctuations. Overall, the model is effective but may need adjustments for greater accuracy in near-term predictions.
+            """)
 
 # Conclusions Page
 elif st.session_state.page_selection == "conclusion":
