@@ -108,7 +108,7 @@ if st.session_state.page_selection == "about":
   
     col8 = st.columns((1.5,4.5,1.5))
     with col8[1]:
-        st.image("<blockquote class="imgur-embed-pub" lang="en" data-id="a/fV9U671"  ><a href="//imgur.com/a/fV9U671">Movies Collage</a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>",width=800,caption='Movies')
+        st.image("https://i.imgur.com/Y9RMzIi.jpeg",width=800,caption='Movies')
 
 
     st.markdown("""
