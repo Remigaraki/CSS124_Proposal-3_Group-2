@@ -100,15 +100,15 @@ print(movie_df)
 #About Page
 if st.session_state.page_selection == "about":
     
-    col8 = st.columns((1, 6, 1))  # Adjusting the middle column width
-    with col8[1]:
-        st.image("https://i.imgur.com/Y9RMzIi.jpeg", width=400, caption='Movies')
-
     st.header("📽️ About")
 
     st.markdown("""
         Data analysis and visualization can be done interactively with a Streamlit web application. The application allows users to enter parameters or upload files, and it uses this information to produce insights in the form of graphs and charts. Additionally, it could execute machine learning models, making predictions or assessing performance instantly. Users can easily explore and access complex data tasks with Streamlit.
                 """)
+    
+    col8 = st.columns((1, 6, 1))  
+    with col8[1]:
+        st.image("https://i.imgur.com/Y9RMzIi.jpeg", width=500, caption='Movies')
 
     st.markdown("""
      ### Pages
