@@ -458,6 +458,35 @@ if st.session_state.page_selection == "machine_learning":
         ax8.legend()
         st.pyplot(fig8)
 
+    # Prophet Forecasting
+    movie_df.columns = movie_df.columns.str.strip()
+    movie_df['Release year'] = pd.to_datetime(movie_df['Release year'], errors='coerce', format='%Y')
+    movie_df.dropna(subset=['Release year'], inplace=True)
+    movie_df = movie_df.groupby('Release year').agg({'Box Office': 'sum'}).reset_index()
+    movie_df.columns = ['ds', 'y']
+
+    # Initialize and fit Prophet model
+    model_prophet = Prophet(yearly_seasonality=True)
+    model_prophet.fit(movie_df)
+
+    # Create future dataframe and forecast
+    future = model_prophet.make_future_dataframe(periods=12, freq='Y')
+    forecast = model_prophet.predict(future)
+
+    # Prophet Forecast in col7
+    with col7:
+        st.subheader("Forecasted Box Office Earnings with Prophet")
+        fig_prophet1 = model_prophet.plot(forecast)
+        plt.title("Box Office Earnings Forecast using Prophet")
+        plt.xlabel("Year")
+        plt.ylabel("Box Office Earnings")
+        st.pyplot(fig_prophet1)
+
+    # Prophet Component Plot in col8
+    with col8:
+        st.subheader("Forecast Components with Prophet")
+        fig_prophet2 = model_prophet.plot_components(forecast)
+        st.pyplot(fig_prophet2)
 
 # Conclusions Page
 elif st.session_state.page_selection == "conclusion":
