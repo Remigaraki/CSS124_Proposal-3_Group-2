@@ -102,7 +102,7 @@ if st.session_state.page_selection == "about":
     
     col8 = st.columns((1, 6, 1))  # Adjusting the middle column width
     with col8[1]:
-        st.image("https://i.imgur.com/Y9RMzIi.jpeg", width=800, caption='Movies')
+        st.image("https://i.imgur.com/Y9RMzIi.jpeg", width=400, caption='Movies')
 
     st.header("📽️ About")
 
