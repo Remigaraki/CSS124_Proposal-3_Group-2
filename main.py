@@ -108,7 +108,7 @@ if st.session_state.page_selection == "about":
     
     col8 = st.columns((1, 6, 1))  
     with col8[1]:
-        st.image("https://i.imgur.com/Y9RMzIi.jpeg", width=500, caption='Movies')
+        st.image("https://i.imgur.com/Y9RMzIi.jpeg", width=550, caption='Movies')
 
     st.markdown("""
      ### Pages
