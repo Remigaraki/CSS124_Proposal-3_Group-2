@@ -33,8 +33,8 @@ from prophet import Prophet
 #######################
 # Page configuration
 st.set_page_config(
-    page_title="Film Industry Insights and Predictions", # Replace this with your Project's Title
-    page_icon="Data/movie_icon.png", # You may replace this with a custom icon or emoji related to your project
+    page_title="Film Industry Insights and Predictions", 
+    page_icon="Data/movie_icon.png", 
     layout="wide",
     initial_sidebar_state="expanded")
 
@@ -42,21 +42,19 @@ alt.themes.enable("dark")
 
 #######################
 
-# Initialize page_selection in session state if not already set
-if 'page_selection' not in st.session_state:
-    st.session_state.page_selection = 'about'  # Default page
 
-# Function to update page_selection
+if 'page_selection' not in st.session_state:
+    st.session_state.page_selection = 'about'  
+
+
 def set_page_selection(page):
     st.session_state.page_selection = page
 
 # Sidebar
 with st.sidebar:
     st.image("Data/movie_icon.png",use_column_width="auto")
-    # Sidebar Title (Change this with your project's title)
     st.title('Film Insights and Predictions')
     
-    # Page Button Navigation
     st.subheader("Pages")
 
     if st.button("About", use_container_width=True, on_click=set_page_selection, args=('about',)):
@@ -172,11 +170,11 @@ elif st.session_state.page_selection == "eda":
         st.markdown("""Summary Statistics: Provides key statistical metrics such as mean, median, and standard deviation for numeric columns.""")
 
         st.subheader("Summary Statistics")
-        st.write(df.describe())  # Summary statistics for numeric columns
+        st.write(df.describe())  
 
         st.subheader("Missing Values")
         missing_values = df.isnull().sum()
-        st.bar_chart(missing_values)  # Bar chart for missing values
+        st.bar_chart(missing_values) 
 
     # 2. Distribution and Summary of Key Metrics
     elif choice == 'Distribution and Summary':
@@ -584,7 +582,6 @@ if st.session_state.page_selection == "machine_learning":
 # Conclusions Page
 elif st.session_state.page_selection == "conclusion":
     st.header("📒 Conclusion")
-    # Your content for the CONCLUSION page goes here
     st.markdown("""
 
 # Time Series System
